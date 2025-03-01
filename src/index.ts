@@ -1,5 +1,6 @@
 import { z } from "zod";
 import express from "express";
+import { client } from "./db";
 
 export const app = express();
 app.use(express.json());
@@ -9,7 +10,7 @@ const sumInput = z.object({
   b: z.number(),
 });
 
-app.post("/sum", (req: any, res: any) => {
+app.post("/sum", async (req: any, res: any) => {
   const parsedResponse = sumInput.safeParse(req.body);
 
   if (!parsedResponse.success) {
@@ -19,6 +20,14 @@ app.post("/sum", (req: any, res: any) => {
   }
 
   const answer = parsedResponse.data.a + parsedResponse.data.b;
+
+  await client.sum.create({
+    data: {
+      a: parsedResponse.data.a,
+      b: parsedResponse.data.b,
+      result: answer,
+    },
+  });
 
   res.json({
     answer,
