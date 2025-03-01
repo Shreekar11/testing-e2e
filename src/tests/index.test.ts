@@ -1,19 +1,39 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import request from "supertest";
 import { app } from "../index";
+import { client } from "../db";
+
+vi.mock("../db");
 
 describe("POST /sum", () => {
   it("should return the sum of two numbers", async () => {
+    client.sum.create.mockResolvedValue({
+      id: 1,
+      a: 1,
+      b: 1,
+      result: 3,
+    });
+
+    vi.spyOn(client.sum, "create");
+
     const res = await request(app).post("/sum").send({
       a: 1,
       b: 2,
     });
+
+    expect(client.sum.create).toHaveBeenCalledWith({
+      data: {
+        a: 1,
+        b: 2,
+        result: 3,
+      },
+    });
+
     expect(res.statusCode).toBe(200);
     expect(res.body.answer).toBe(3);
   });
 
   it("should return 411 if no inputs are provided", async () => {
-    // test for when no input is passed in the body
     const res = await request(app).post("/sum").send({});
     expect(res.statusCode).toBe(411);
     expect(res.body.message).toBe("Incorrect inputs");
@@ -22,6 +42,13 @@ describe("POST /sum", () => {
 
 describe("GET /sum", () => {
   it("should return the sum of two numbers", async () => {
+    client.sum.create.mockResolvedValue({
+      id: 1,
+      a: 1,
+      b: 1,
+      result: 3,
+    });
+
     const res = await request(app)
       .get("/sum")
       .set({

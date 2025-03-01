@@ -21,7 +21,7 @@ app.post("/sum", async (req: any, res: any) => {
 
   const answer = parsedResponse.data.a + parsedResponse.data.b;
 
-  await client.sum.create({
+  const response = await client.sum.create({
     data: {
       a: parsedResponse.data.a,
       b: parsedResponse.data.b,
@@ -31,10 +31,11 @@ app.post("/sum", async (req: any, res: any) => {
 
   res.json({
     answer,
+    id: response.id,
   });
 });
 
-app.get("/sum", (req: any, res: any) => {
+app.get("/sum", async (req: any, res: any) => {
   const parsedResponse = sumInput.safeParse({
     a: Number(req.headers["a"]),
     b: Number(req.headers["b"]),
@@ -48,7 +49,15 @@ app.get("/sum", (req: any, res: any) => {
 
   const answer = parsedResponse.data.a + parsedResponse.data.b;
 
+  const response = await client.sum.create({
+    data: {
+      a: parsedResponse.data.a,
+      b: parsedResponse.data.b,
+      result: answer,
+    },
+  });
   res.json({
     answer,
+    id: response.id,
   });
 });
